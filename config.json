@@ -63,7 +63,7 @@
         },
         {
             "name": "Mobile Navigation",
-            "navigation" : [
+            "navigation": [
               {
                   "name": "Introduction"
               },
@@ -86,13 +86,21 @@
         },
         {
             "name": "Developer Tools",
-            "navigation" : [
-                {
-                    "name": "Relay"
-                },
-                {
-                    "name": "RPC Builder"
-                }
+            "navigation": [
+              {
+                  "name": "Relay"
+              },
+              {
+                  "name": "RPC Builder"
+              }
+            ]
+        },
+        {
+            "name": "Migration Guides",
+            "navigation": [
+              {
+                  "name": "Updating from 4.X.X to 4.3+"
+              }
             ]
         }
     ]
