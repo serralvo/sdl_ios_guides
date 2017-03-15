@@ -42,19 +42,32 @@ Because of this, any delegate function will become non-functional when migrating
 ### SDLRPCRequestFactory
 If you are using the `SDLRPCRequestFactory` class, you will need to update the initializers of all RPCs to use this. This will be the following migrations:
 
-#### `hsdl_performWelcomeMessage`
+```objc 
+- (void)hsdl_performWelcomeMessage {
+    NSLog(@"Send welcome message");
+    SDLShow *show = [[SDLShow alloc] init];
+    show.mainField1 = WelcomeShow;
+    show.alignment = [SDLTextAlignment CENTERED];
+    show.correlationID = [self hsdl_getNextCorrelationId];
+    [self.proxy sendRPC:show];
 
-```objc
-SDLSpeak *speak = [SDLRPCRequestFactory buildSpeakWithTTS:WelcomeSpeak correlationID:[self hsdl_getNextCorrelationId]];
+    SDLSpeak *speak = [SDLRPCRequestFactory buildSpeakWithTTS:WelcomeSpeak correlationID:[self hsdl_getNextCorrelationId]];
+    [self.proxy sendRPC:speak];
+}
 ```
 
 to
 
 ```objc
-SDLSpeak *speak = [[SDLSpeak alloc] initWithTTS:WelcomeSpeak];
-```
+- (void)hsdl_performWelcomeMessage {
+    NSLog(@"Send welcome message");
+    SDLShow *show = [[SDLShow alloc] initWithMainField1:WelcomeShow mainField2:nil alignment:SDLTextAlignment.CENTERED];
+    [self.proxy sendRPC:show];
 
-#### `hsdl_addCommands`
+    SDLSpeak *speak = [[SDLSpeak alloc] initWithTTS:WelcomeSpeak];
+    [self.proxy sendRPC:speak];
+}
+```
 
 `SDLAddCommand` utilizes the new handler mechanism for responding to when a user interacts with the command you have added. When using the initializer, you can see we set the new `handler` property to use the same code we originally wrote in `onOnCommand:`.
 
@@ -116,35 +129,6 @@ to
 }
 ```
 
-#### `hsdl_performWelcomeMessage`
-
-```objc 
-- (void)hsdl_performWelcomeMessage {
-    NSLog(@"Send welcome message");
-    SDLShow *show = [[SDLShow alloc] init];
-    show.mainField1 = WelcomeShow;
-    show.alignment = [SDLTextAlignment CENTERED];
-    show.correlationID = [self hsdl_getNextCorrelationId];
-    [self.proxy sendRPC:show];
-
-    SDLSpeak *speak = [SDLRPCRequestFactory buildSpeakWithTTS:WelcomeSpeak correlationID:[self hsdl_getNextCorrelationId]];
-    [self.proxy sendRPC:speak];
-}
-```
-
-to
-
-```objc
-- (void)hsdl_performWelcomeMessage {
-    NSLog(@"Send welcome message");
-    SDLShow *show = [[SDLShow alloc] initWithMainField1:WelcomeShow mainField2:nil alignment:SDLTextAlignment.CENTERED];
-    [self.proxy sendRPC:show];
-
-    SDLSpeak *speak = [[SDLSpeak alloc] initWithTTS:WelcomeSpeak];
-    [self.proxy sendRPC:speak];
-}
-```
-
 !!! note
 
 We are not updating all of the functions that utilitze `SDLRPCRequestFactory`, because we are going to be deleting those functions later on in the guide.
@@ -176,7 +160,8 @@ Our first step of removing the usage of `SDLProxy` is to add in an `SDLManager` 
 #### SDLProxyListener to SDLManagerDelegate
 `SDLManagerDelegate` is a small protocol that gives back only 2 callbacks, as compared to `SDLProxyListener`'s 67 callbacks. As mentioned before, all of these callbacks from `SDLProxyListener` are now sent out as `NSNotifications`, and the names for these are located in `SDLNotificationConstants.h`. From these delegate changes, we can modify the following functions to use the new `SDLManagerDelegate` callbacks
 
-##### `onProxyClosed` to `managerDidDisconnect`
+`onProxyClosed` to `managerDidDisconnect`:
+
 ```objc
 - (void)onProxyClosed {
     NSLog(@"SDL Disconnect");
@@ -215,7 +200,7 @@ to
 }
 ```
 
-#### `onOnHMIStatus:` to `hmiLevel:didChangeToLevel:`
+`onOnHMIStatus:` to `hmiLevel:didChangeToLevel:`
 ```objc
 - (void)onOnHMIStatus:(SDLOnHMIStatus *)notification {
     NSLog(@"HMIStatus notification from SDL");
@@ -601,11 +586,3 @@ to
 ```
 
 We can now finally remove `SDLProxy` from the project's instance variables.
-<!-- 
-`SDLLifecycleConfiguration` allows for a developer to specify an app icon, and uploads and displays the image for you. Because of this, we can remove the following functions from the project:
-- `hsdl_uploadImages`
-- `onListFilesResponse:`
-- `hsdl_uploadImage:withCorrelationId:`
-- `onPutFileRespone:`
-- `hsdl_setAppIcon` -->
-
