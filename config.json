@@ -50,6 +50,9 @@
             "name": "Adding the Lock Screen"
         },
         {
+        	"name": "Configuring SDL Logging"
+        },
+        {
             "name": "Getting Vehicle Data"
         },
         {
